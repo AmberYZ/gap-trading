@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+
+<title>Gap - Dashboard</title>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+body {font-family: "Lato", sans-serif}
+.mySlides {display: none}
+</style>
+
+<script src="https://d3js.org/d3.v3.min.js"></script>
+<script src="https://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+<script src="https://d3js.org/d3-time.v1.min.js"></script>
+<script src="https://d3js.org/d3-time-format.v2.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
+<head>
+	<script>
+		var today = '{{today}}'
+		var path_dict = JSON.parse('{{path |  tojson | safe }}')
+		var all_data = JSON.parse('{{all_data |  tojson | safe }}')
+		var up_down = '{{up_down}}'
+	</script>	
+	<script type="text/javascript" src="/static/js/make_plot.js"></script>
+</head>
+
+
+<body>
+	<!--Create selection buttons for 10 gappers-->
+	<div class="w3-top">
+		<div class="w3-bar w3-black w3-card">
+			{% for column in stocks %}
+			<button type="button" class="w3-padding-large w3-button" id="{{column}}" onclick="plot('{{column}}')">{{column}} </button>
+			{% endfor %}
+
+			<input type="text" class="w3-text" id="search_input" value='2018-mm-dd'></input>
+
+			<button type="button" class="w3-padding-large w3-button" id="search">Search another day</button>
+			<script type="text/javascript">
+				document.getElementById("search").onclick = function () {
+					location.href = "/"+up_down+"_"+document.getElementById("search_input").value;
+				};
+			</script>
+		</div>
+	</div>
+
+
+
+	<!-- The page content -->
+	<div class="w3-content w3-white w3-center" style="max-width:2000px;margin-top:20px">
+		<!-- Print sorted gap info --> 
+		<div class="w3-container w3-content w3-center w3-padding-32" style="max-width:800px" id="gapInfo">
+			<h2 class="w3-wide w3-center">Gap day: {{today}}</h2>
+		<h4 class = "w3-wide w3-center" id='TimeSeriesTitle'></h4>
+		</div>
+	</div>
+	<div class="w3-center" id="6-day-TimeSeries"></div>
+
+	<!-- News -->
+	<div class="w3-container w3-content w3-center w3-padding-32" style="max-width:800px">
+		<h2 class="w3-wide w3-center">News with top number of clicks (if available)</h2>
+		<div class="w3-center" id="news"></div>
+	</div>
+
+
+	<!--PLot time series-->
+	<h4 class="w3-center w3-wide">Individual day plots</h4>
+	<div class="w3-center" id="priceTimeSeries"></div>
+
+	<!-- Regress results: to be updated -->
+	<!-- <output id='averageReturn'>0.0</output> %</h4><br> -->
+	<div class="w3-content w3-center w3-white">
+		<table class="w3-table w3-centered w3-bordered">
+			<tr>
+				<th>Stock</th>
+				<th> Gap (% diff) </th> 
+			</tr>
+
+			{% for row in gap_value %}
+			<tr>
+				<th>{{row[0]}}</th>
+				<th>{{row[1]}}</th>
+			</tr>
+			{% endfor %}
+		</table>
+	</div>
+
+	<p class="w3-center">Data and news update Mon - Fri at 16:30. Data sync daily at 17:30</p>
+
+	<!--Customize MA intervals-->
+	<div class="w3-content w3-center w3-white">
+		<p><br></b></p>
+		<h2 class="w3-wide w3-center">Replot with customized MA intervals</h2>
+		<p class="w3-wide w3-opacity w3-center w3-bold">In the unit of 5 minutes</p>
+		<form class="w3-center" method="post" id="timeSeriesInterval">
+			Short-term MA Interval: <input type="number" name="ma1" id='inputMa1'>
+			Long-term MA Interval: <input type="number" name="ma2" id='inputMa2'>
+			<input type="button" onclick="rePlot6()" value="Plot 6-day">
+			<input type="button" onclick="rePlot1()" value="Plot 1-day ">
+		</form>
+		<p><br></p>
+	</div>
+
+</body>
+
+
+</html>
